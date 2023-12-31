@@ -3,8 +3,9 @@ const morgan = require('morgan')
 const cors = require('cors')
 
 const app = express()
-//tarkastaa onko dist-kansiossa staattisia tiedostoja, jos on, palauttaa ne
+//tarkastaa onko dist-kansiossa staattisia tiedostoja, jos on, palauttaa ne jos niitä pyydetään
 app.use(express.static('dist'))
+// called every time a request with a JSON payload comes in
 app.use(express.json())
 
 const corsOptions = {
@@ -12,38 +13,11 @@ const corsOptions = {
   optionsSuccessStatus: 200
 }
 
+// called on every request
 app.use(cors(corsOptions))
 
 morgan.token('body', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
-
-let persons = [
-    {
-      "name": "Dan Abramov",
-      "number": "12-43-234345",
-      "id" : 1
-    },
-    {
-      "name": "Arto Hellas",
-      "number": "040-123456",
-      "id" : 2,
-    },
-    {
-      "name": "Ada Lovelace",
-      "number": "987654321",
-      "id" : 3,
-    },
-    {
-      "name": "Pullura",
-      "number": "654321",
-      "id" : 4,
-    },
-    {
-      "name": "Pekka",
-      "number": "987987987",
-      "id" : 5,
-    }
-  ]
 
 const personExists = (name) => {
   const found = persons.find(person => person.name.toLowerCase() === name.toLowerCase())
@@ -66,6 +40,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/persons', (req, res) => {
+  // automatically stringifies the object & sets the header to application/json
   res.json(persons)
 })
 
@@ -119,7 +94,7 @@ app.post('/api/persons', (req, res) => {
   res.json(newPerson)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
