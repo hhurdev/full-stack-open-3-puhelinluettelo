@@ -1,21 +1,22 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
+require('dotenv').config()
+const mongoose = require('mongoose')
 
 const password = process.env.MONGO_ATLAS_PASSWORD
-const url = process.env.MONGO_ATLAS_URL.replace('<password>', password);
+const url = process.env.MONGO_ATLAS_URL.replace('<password>', password)
 
 mongoose.set('strictQuery', false)
 
 mongoose.connect(url)
-.then(result => {
-  console.log("Connected to the database")
-}).catch(error => {
-  console.log("Problem with database connection.")
-  console.log(error)
-})
+  // eslint-disable-next-line no-unused-vars
+  .then(result => {
+    console.log('Connected to the database')
+  }).catch(error => {
+    console.log('Problem with database connection.')
+    console.log(error)
+  })
 
 // luodaan skeema ja validointisäännöt
-const personSchema = new mongoose.Schema({ 
+const personSchema = new mongoose.Schema({
   name: {
     type: String,
     minLength: 3,
@@ -25,9 +26,9 @@ const personSchema = new mongoose.Schema({
     type: String,
     validate: {
       validator: function(v) {
-        return v.length >= 8 && /^(\d{2,3})-(\d+)$/.test(v);
+        return v.length >= 8 && /^(\d{2,3})-(\d+)$/.test(v)
       },
-    },  
+    },
     required: true
   }
 })
@@ -41,6 +42,6 @@ personSchema.set('toJSON', {
 
 })
 
-const Person = mongoose.model('Person', personSchema);
+const Person = mongoose.model('Person', personSchema)
 
-module.exports = Person;
+module.exports = Person

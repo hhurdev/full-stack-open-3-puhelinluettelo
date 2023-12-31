@@ -17,6 +17,7 @@ const corsOptions = {
 // called on every request
 app.use(cors(corsOptions))
 
+// eslint-disable-next-line no-unused-vars
 morgan.token('body', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
@@ -24,7 +25,7 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 // -----------------------------------
 
 const personExists = (name) => {
-  console.log("personExists")
+  console.log('personExists')
   return Person.find({ name: name })
     .then(persons => {
       if(persons.length > 0) {
@@ -43,34 +44,34 @@ app.get('/', (req, res) => {
 })
 
 app.post('/api/persons', (req, res, next) => {
-  console.log("Posting person")
+  console.log('Posting person')
   const body = req.body
-  console.log("body: ", body)
+  console.log('body: ', body)
 
   personExists(body.name).then(exists => {
     console.log(`personExists has run: ${exists}`)
     if (exists) {
       return res.status(400).json({
-        "error" : "Person has already been added!"
+        'error' : 'Person has already been added!'
       })
     } else {
       // Add the person
-      console.log("Adding person")
+      console.log('Adding person')
       const person = new Person({
         name: body.name,
         number: body.number
       })
-    
+
       person.save()
         .then(savedPerson => {
-          console.log(`Person saved to database.`)
+          console.log('Person saved to database.')
           res.json(savedPerson)
         }).catch(err => {
-          console.log("Couldn't save the new person.")
+          console.log('Couldn\'t save the new person.')
           next(err)
         })
     }
-  });
+  })
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
@@ -88,32 +89,32 @@ app.put('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndUpdate(
     id,
     newPerson,
-    {new: true, runValidators: true, context: 'query'}
+    { new: true, runValidators: true, context: 'query' }
   )
-  .then(updatedPerson => {
-    res.json(updatedPerson)
-  })
-  .catch(err => {
-    console.log("Couldn't update the person's info")
-    next(err)
-  })
+    .then(updatedPerson => {
+      res.json(updatedPerson)
+    })
+    .catch(err => {
+      console.log('Couldn\'t update the person\'s info')
+      next(err)
+    })
 })
 
 app.get('/api/persons', (req, res) => {
   // automatically stringifies the object & sets the header to application/json
-  Person.find({}).then(persons => { 
+  Person.find({}).then(persons => {
     res.json(persons)
   })
 })
 
-app.get('/info', (req, res) => { 
+app.get('/info', (req, res) => {
   const date = new Date()
   Person.find({})
-  .then(people => {
-    const peopleLength = people.length
-    res.send(`<p>Phonebook has info on ${peopleLength} people</p>
+    .then(people => {
+      const peopleLength = people.length
+      res.send(`<p>Phonebook has info on ${peopleLength} people</p>
               <p>${date}<p>`)
-  })
+    })
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
@@ -123,11 +124,11 @@ app.get('/api/persons/:id', (req, res, next) => {
       if (person) {
         res.json(person)
       } else {
-        console.log("Couldn't find person :(")
+        console.log('Couldn\'t find person :(')
         res.status(404).end()
       }
     }).catch(err => {
-      console.log("Error in finding the person by id")
+      console.log('Error in finding the person by id')
       next(err)
     })
 })
@@ -135,17 +136,18 @@ app.get('/api/persons/:id', (req, res, next) => {
 app.delete('/api/persons/:id', (req, res, next) => {
   const id = req.params.id
   Person.findByIdAndDelete(id)
+    // eslint-disable-next-line no-unused-vars
     .then(result => {
       console.log(`Person with id ${id} deleted.`)
       res.status(204).end()
     }).catch(err => {
-      console.log("Couldn't delete the person with id " + id)
+      console.log('Couldn\'t delete the person with id ' + id)
       next(err)
     })
 })
 
 const unknownEndpoint = (req, res) => {
-  res.status(404).send({ err: "unknown endpoint"})
+  res.status(404).send({ err: 'unknown endpoint' })
 }
 
 app.use(unknownEndpoint)
@@ -161,7 +163,7 @@ const errorHandler = (err, req, res, next) => {
   } else if (err.name === 'ValidationError') {
     return res.status(400).json({ error: err.message })
   }
-  
+
   next(err)
 }
 
