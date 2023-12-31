@@ -85,18 +85,24 @@ const App = () => {
     event.preventDefault()
     const newPerson = { name: newName, number: newNumber }
 
-    if (!validateInput(newPerson)) {
-      return;
-    }
+    // if (!validateInput(newPerson)) {
+    //   return;
+    // }
 
-    phonebookService.create(newPerson)
+    phonebookService
+      .create(newPerson)
       .then((person) => {
         setPersons(persons.concat(person))
         setNewName('')
         setNewNumber('')
         showNotification({ message: `Added ${person.name}`, type: 'notification'} )
-    }).catch(error => {
-      showNotification({ message: `An error occurred with adding the person.`, type: 'error'} )
+    })
+    .catch(error => {
+      showNotification({ 
+        message: `Error with adding person to phonebook.
+        Name must be at least 3 characters,
+        number of form 02-12345 or 040-1234567`, 
+        type: 'error'} )
     })
   }
 

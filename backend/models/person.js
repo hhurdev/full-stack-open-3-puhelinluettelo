@@ -14,9 +14,22 @@ mongoose.connect(url)
   console.log(error)
 })
 
+// luodaan skeema ja validointisäännöt
 const personSchema = new mongoose.Schema({ 
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minLength: 3,
+    required: true
+  },
+  number: {
+    type: String,
+    validate: {
+      validator: function(v) {
+        return v.length >= 8 && /^(\d{2,3})-(\d+)$/.test(v);
+      },
+    },  
+    required: true
+  }
 })
 
 personSchema.set('toJSON', {

@@ -42,19 +42,13 @@ app.get('/', (req, res) => {
   res.send('<h1>Phonebook app<h1>')
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
   console.log("Posting person")
   const body = req.body
-  console.log("body: ", body.name)
-
-  if (!body.name || !body.number) {
-    return res.status(400).json({
-      "error" : "content missing"
-    })
-  }
+  console.log("body: ", body)
 
   personExists(body.name).then(exists => {
-    console.log("personExists has run")
+    console.log(`personExists has run: ${exists}`)
     if (exists) {
       return res.status(400).json({
         "error" : "Person has already been added!"
@@ -71,11 +65,38 @@ app.post('/api/persons', (req, res) => {
         .then(savedPerson => {
           console.log(`Person saved to database.`)
           res.json(savedPerson)
-        }).catch(error => {
+        }).catch(err => {
           console.log("Couldn't save the new person.")
+          next(err)
         })
     }
   });
+})
+
+app.put('/api/persons/:id', (req, res, next) => {
+  const { name, number } = req.body
+  const id = req.params.id
+
+  const newPerson = {
+    name,
+    number
+  }
+
+  // täytyy antaa normaali olio eikä Person oliota
+  // new true koska muuten palauttaisi og olion eikä uutta
+  // run validators: muuten ei validoisi dataa updatessa
+  Person.findByIdAndUpdate(
+    id,
+    newPerson,
+    {new: true, runValidators: true, context: 'query'}
+  )
+  .then(updatedPerson => {
+    res.json(updatedPerson)
+  })
+  .catch(err => {
+    console.log("Couldn't update the person's info")
+    next(err)
+  })
 })
 
 app.get('/api/persons', (req, res) => {
@@ -105,9 +126,9 @@ app.get('/api/persons/:id', (req, res, next) => {
         console.log("Couldn't find person :(")
         res.status(404).end()
       }
-    }).catch(error => {
-      console.log("catching the error in finding the person")
-      next(error)
+    }).catch(err => {
+      console.log("Error in finding the person by id")
+      next(err)
     })
 })
 
@@ -117,14 +138,14 @@ app.delete('/api/persons/:id', (req, res, next) => {
     .then(result => {
       console.log(`Person with id ${id} deleted.`)
       res.status(204).end()
-    }).catch(error => {
+    }).catch(err => {
       console.log("Couldn't delete the person with id " + id)
-      next(error)
+      next(err)
     })
 })
 
 const unknownEndpoint = (req, res) => {
-  res.status(404).send({ error: "unknown endpoint"})
+  res.status(404).send({ err: "unknown endpoint"})
 }
 
 app.use(unknownEndpoint)
@@ -137,6 +158,8 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === 'CastError') {
     return res.status(400).send({ error: 'malformatted id' })
+  } else if (err.name === 'ValidationError') {
+    return res.status(400).json({ error: err.message })
   }
   
   next(err)
